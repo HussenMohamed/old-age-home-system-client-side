@@ -14,7 +14,8 @@ The dashboard provides an overview of key metrics and activities within the old 
 - Total number of residents
 - Task progress
 - Occupied rooms
-![Dashboard Screenshot]("C:\Users\ASUS\Pictures\Screenshots\Screenshot 2024-01-27 132449.png")
+<img width="1266" alt="Screenshot 2024-01-27 132449" src="https://github.com/HussenMohamed/old-age-home-system-client-side/assets/68970611/e61ce70f-c985-4749-851f-416f5045327e">
+
 ### Residents Page
 
 The Residents page displays a table containing information about all the residents. Each resident entry includes details such as name, age, nationality, and marital status. The admin can perform actions like viewing the resident's profile, editing their data, or deleting the resident.
