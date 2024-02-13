@@ -22,7 +22,6 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "../../App.css";
-// TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 enum UserType {
   Staff = "staff",
@@ -49,7 +48,7 @@ export const SignUp = () => {
     error,
     isSuccess,
   } = useQuery({
-    queryKey: ["roles"], // http://localhost:4500/roles
+    queryKey: ["roles"],
     queryFn: () =>
       fetch("http://localhost:4500/roles").then((res) => res.json()),
   });
@@ -100,7 +99,7 @@ export const SignUp = () => {
       console.log(JSON.stringify(data));
       if (data.success) {
         toast.success(
-          "Your Request has been sent to the Adminstrators, Wait for it to them to accept it"
+          "Your Request has been sent to the Adminstrators, Wait for them to accept it"
         );
         navigate("/login");
       } else {

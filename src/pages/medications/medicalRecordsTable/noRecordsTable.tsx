@@ -65,14 +65,14 @@ const data = [
     bloodType: "AB-",
   },
 ];
-const NoRecordsTable = () => {
+const NoRecordsTable = (props) => {
   const navigate = useNavigate();
-
+  const { residentsWithNoRecords } = props;
   //should be memoized or stable
   const columns = useMemo<MRT_ColumnDef<Person>[]>(
     () => [
       {
-        accessorKey: "residentID", //access nested data with dot notation
+        accessorKey: "ResidentID", //access nested data with dot notation
         header: "ID",
         size: 150,
         muiTableHeadCellProps: {
@@ -83,7 +83,7 @@ const NoRecordsTable = () => {
         },
       },
       {
-        accessorKey: "name",
+        accessorKey: "Name",
         header: "Name",
         size: 150,
         muiTableHeadCellProps: {
@@ -95,7 +95,7 @@ const NoRecordsTable = () => {
       },
 
       {
-        accessorKey: "age",
+        accessorKey: "Age",
         header: "Age",
         size: 150,
         muiTableHeadCellProps: {
@@ -110,7 +110,7 @@ const NoRecordsTable = () => {
   );
   const table = useMaterialReactTable({
     columns,
-    data,
+    data: residentsWithNoRecords,
     enableRowActions: true,
     getRowId: (originalRow) => originalRow.residentID,
     renderRowActions: ({ row }) => (

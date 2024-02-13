@@ -12,8 +12,58 @@ import CssBaseline from "@mui/material/CssBaseline";
 import RecordsTable from "./recordsTable";
 import Navbar from "../../../components/navbar-appDrawer";
 import NoRecordsTable from "./noRecordsTable";
+
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import axios from "axios";
+import Title from "../../Dashboard/Title";
+
 const defaultTheme = createTheme();
 export default function MedicalRecords() {
+  const {
+    data: medicalRecordsData,
+    isFetching,
+    isSuccess: isMedicalRecordsSuccess,
+  } = useQuery({
+    queryKey: ["medicalRecordsData"],
+    queryFn: () =>
+      axios.get("http://localhost:4500/record").then((res) => {
+        return res.data;
+      }),
+  });
+  const { data: countOfRecords, isSuccess: isCountOfRecordsSuccess } = useQuery(
+    {
+      queryKey: ["countOfRecords"],
+      queryFn: () =>
+        axios.get("http://localhost:4500/record/count").then((res) => {
+          return res.data.TotalMedicalRecords;
+        }),
+    }
+  );
+  const { data: countOfNoRecords, isSuccess: isCountOfNoRecordsSuccess } =
+    useQuery({
+      queryKey: ["countOfNoRecords"],
+      queryFn: () =>
+        axios
+          .get("http://localhost:4500/residents/noMedicalRecordsCount")
+          .then((res) => {
+            return res.data.ResidentsWithoutMedicalRecord;
+          }),
+    });
+
+  const {
+    data: residentsWithNoRecords,
+    isSuccess: isResidentsWithNoRecordsSuccess,
+  } = useQuery({
+    queryKey: ["residentsWithNoRecords"],
+    queryFn: () =>
+      axios
+        .get("http://localhost:4500/residents/noMedicalRecords")
+        .then((res) => {
+          return res.data;
+        }),
+  });
+
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -47,12 +97,15 @@ export default function MedicalRecords() {
                     color="primary"
                     fontWeight="bold"
                   >
-                    39{" "}
+                    {isCountOfRecordsSuccess && countOfRecords}
+
                     <Typography variant="h5" color="gray">
                       Medical Records
                     </Typography>
                   </Typography>
-                  <RecordsTable />
+                  {isMedicalRecordsSuccess && (
+                    <RecordsTable medicalRecordsData={medicalRecordsData} />
+                  )}
                 </Paper>
               </Grid>
               <Grid item xs={12}>
@@ -68,12 +121,16 @@ export default function MedicalRecords() {
                     color="primary"
                     fontWeight="bold"
                   >
-                    8
+                    {isCountOfNoRecordsSuccess && countOfNoRecords}
                     <Typography variant="h5" color="gray">
                       Residents Does Not Have A Medical Record
                     </Typography>
                   </Typography>
-                  <NoRecordsTable />
+                  {isResidentsWithNoRecordsSuccess && (
+                    <NoRecordsTable
+                      residentsWithNoRecords={residentsWithNoRecords}
+                    />
+                  )}
                 </Paper>
               </Grid>
             </Grid>

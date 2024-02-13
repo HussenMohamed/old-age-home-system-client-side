@@ -20,8 +20,12 @@ import MyTasks from "./pages/tasks/myTasks";
 import Inventory from "./pages/inventory";
 import EditProduct from "./pages/inventory/editProduct";
 import AddProduct from "./pages/inventory/addProduct";
+import FamilyMembers from "./pages/familyMembers";
+import AddResident from "./pages/residents/AddResident.tsx";
+import AddStaffMember from "./pages/staff/addStaff/index.tsx";
 
 function App() {
+  localStorage.setItem("staffId", 6);
   return (
     <div>
       <Router>
@@ -30,18 +34,20 @@ function App() {
           <Route path="/login" element={<SignIn />} />
           <Route path="/register" element={<SignUp />} />
           <Route path="/residents" element={<Residents />} />
+          <Route path="/residents/add" element={<AddResident />} />
           <Route path="/resident/:id/edit" element={<ResidentProfile />} />
           <Route path="/resident/:id" element={<ViewResident />} />
           <Route
-            path="/resident/:id/addMedication"
+            path="/resident/:id/addMedication/:medicalRecordId"
             element={<AddMedication />}
           />
+          {/* addMedication */}
           <Route
             path="/resident/:id/medicalRecord"
             element={<MedicalRecord />}
           />
           <Route
-            path="/resident/:id/addMedicalRecord"
+            path="/resident/:residentId/addMedicalRecord"
             element={<AddMedicalRecord />}
           />
 
@@ -50,6 +56,7 @@ function App() {
             element={<MedicalRecords />}
           />
           <Route path="/staff" element={<Staff />} />
+          <Route path="/staff/add" element={<AddStaffMember />} />
           <Route path="/staff/:staffId" element={<ViewStaff />} />
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/staff/:staffId/tasks" element={<StaffTasks />} />
@@ -58,6 +65,7 @@ function App() {
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/inventory/:productId/edit" element={<EditProduct />} />
           <Route path="/inventory/addProduct" element={<AddProduct />} />
+          <Route path="/FamilyMembers" element={<FamilyMembers />} />
         </Routes>
       </Router>
     </div>

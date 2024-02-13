@@ -17,6 +17,12 @@ import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import { styled, lighten, darken } from "@mui/system";
 import { useNavigate } from "react-router-dom";
+
+import axios from "axios";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+
 const userData = [
   { userName: "JohnDoe", department: "HR" },
   { userName: "JaneSmith", department: "HR" },
@@ -72,13 +78,26 @@ function SimpleDialog(props: SimpleDialogProps) {
   const handleListItemClick = (value: string) => {
     onClose(value);
   };
-  const options = userData
+
+  // fetch the roles so the user can select from them
+  const { isPending, error, data, isFetching } = useQuery({
+    queryKey: ["repoData"],
+    queryFn: () =>
+      axios.get("http://localhost:4500/roles/staffByRoles").then((res) => {
+        return res.data;
+      }),
+  });
+
+  if (isPending) return "Loading...";
+
+  if (error) return "An error has occurred: " + error.message;
+
+  const options = data
     .map((option) => ({
-      department: option.department,
+      role: option.roleName,
       ...option,
     }))
-    .sort((a, b) => a.department.localeCompare(b.department));
-
+    .sort((a, b) => a.role.localeCompare(b.role));
   return (
     <Dialog
       onClose={handleClose}
@@ -89,26 +108,24 @@ function SimpleDialog(props: SimpleDialogProps) {
       <DialogTitle>Choose Staff Member</DialogTitle>
       <Autocomplete
         id="grouped-demo"
-        options={options.sort(
-          (a, b) => -b.department.localeCompare(a.department)
-        )}
-        groupBy={(option) => option.department}
-        getOptionLabel={(option) => option.userName}
-        sx={{ width: 300 }}
-        renderInput={(params) => (
-          <TextField {...params} label="With categories" />
-        )}
+        options={options.sort((a, b) => -b.role.localeCompare(a.role))}
+        groupBy={(option) => option.role}
+        getOptionLabel={(option) => option.staffMemberName}
+        sx={{ width: 300, marginRight: "20px", marginLeft: "20px" }}
+        renderInput={(params) => <TextField {...params} label="With Roles" />}
         renderGroup={(params) => (
-          <li key={params.key}>
+          <li key={params.key} value={options.StaffID}>
             <GroupHeader>{params.group}</GroupHeader>
             <GroupItems>{params.children}</GroupItems>
           </li>
         )}
         onChange={(event: any, newValue: string | null) => {
-          setInputValue(newValue);
+          setInputValue(newValue.StaffID);
         }}
       />
-      <Button onClick={() => navigate("/staff/S5464/addTask")}>Send</Button>
+      <Button onClick={() => navigate(`/staff/${inputValue}/addTask`)}>
+        Add Task
+      </Button>
     </Dialog>
   );
 }

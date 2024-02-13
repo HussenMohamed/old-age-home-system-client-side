@@ -11,14 +11,55 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 import Navbar from "../../../components/navbar-appDrawer";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import React, { useState } from "react";
+import { Dayjs } from "dayjs";
+
+import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 const defaultTheme = createTheme();
 export default function AddProduct() {
   // dueDate with default value
-  // const [dueDate, setDueDate] = React.useState<Dayjs | null>(
-  //   dayjs("2022-04-17T15:30")
-  // );
-  // dueDate without default value
+  const [expirationDate, setExpirationDate] = React.useState<Dayjs | null>(
+    null
+  );
+  const [productName, setProductName] = useState("");
+  const [productCategory, setProductCategory] = useState("");
+  const [productDescription, setProductDescription] = useState("");
+  const [currentStock, setCurrentStock] = useState();
+  const [stockThreshold, setStockThreshold] = useState();
+
+  const handleSubmit = () => {
+    const productData = {
+      expirationDate: expirationDate?.format("YYYY-MM-DD"),
+      productName,
+      category: productCategory,
+      description: productDescription,
+      currentStock,
+      stockThreshold,
+    };
+    // console.log(productData);
+    sendProductData(productData);
+  };
+  const { mutate: sendProductData } = useMutation({
+    mutationKey: ["sendProductData"],
+    mutationFn: (data) => {
+      axios
+        .post(`http://localhost:4500/product`, data)
+        .then((response) => {
+          console.log(response);
+          toast.success(response.data.success);
+        })
+        .catch((error) => {
+          console.log(error);
+          toast.error(error.response.data.message);
+        });
+    },
+  });
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -47,6 +88,9 @@ export default function AddProduct() {
                         id="outlined-required"
                         label="Product Name"
                         fullWidth
+                        onChange={(e) => {
+                          setProductName(e.target.value);
+                        }}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -54,6 +98,9 @@ export default function AddProduct() {
                         id="outlined-required"
                         label="Category"
                         fullWidth
+                        onChange={(e) => {
+                          setProductCategory(e.target.value);
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -63,6 +110,9 @@ export default function AddProduct() {
                         multiline
                         rows={3}
                         fullWidth
+                        onChange={(e) => {
+                          setProductDescription(e.target.value);
+                        }}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -73,6 +123,9 @@ export default function AddProduct() {
                         fullWidth
                         InputLabelProps={{
                           shrink: true,
+                        }}
+                        onChange={(e) => {
+                          setCurrentStock(parseInt(e.target.value));
                         }}
                       />
                     </Grid>
@@ -85,10 +138,27 @@ export default function AddProduct() {
                         InputLabelProps={{
                           shrink: true,
                         }}
+                        onChange={(e) => {
+                          setStockThreshold(parseInt(e.target.value));
+                        }}
                       />
                     </Grid>
+                    <Grid item xs={12} md>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DemoContainer components={["DatePicker"]}>
+                          <DatePicker
+                            value={expirationDate}
+                            onChange={(newValue) => setExpirationDate(newValue)}
+                            label="End Date"
+                            sx={{ width: "100%" }}
+                          />
+                        </DemoContainer>
+                      </LocalizationProvider>
+                    </Grid>
                     <Grid item xs={12} textAlign="center">
-                      <Button variant="contained">Add Product</Button>
+                      <Button variant="contained" onClick={handleSubmit}>
+                        Add Product
+                      </Button>
                     </Grid>
                   </Grid>
                 </Paper>

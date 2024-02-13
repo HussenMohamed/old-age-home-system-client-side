@@ -20,9 +20,41 @@ import AlarmIcon from "@mui/icons-material/Alarm";
 import Navbar from "../../../components/navbar-appDrawer";
 import AddIcon from "@mui/icons-material/Add";
 const defaultTheme = createTheme();
-
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
+import SpecificUncompletedTasks from "../components/specificUncompletedTasks";
+import SpecificCompletedTasks from "../components/SpecificCompletedTasks";
 export default function MyTasks() {
   const navigate = useNavigate();
+  const assigneeId = localStorage.getItem("staffId");
+  const {
+    data: uncompletedTasks,
+    isSuccess: isUncompletedTasksSuccess,
+    refetch: uncompletedRefetch,
+  } = useQuery({
+    queryKey: ["uncompletedTasks"],
+    queryFn: () =>
+      axios
+        .get(`http://localhost:4500/tasks/uncompleted/${assigneeId}`)
+        .then((res) => {
+          console.log(res.data);
+          return res.data;
+        }),
+  });
+  const {
+    data: completedTasks,
+    isSuccess: isCompletedTasksSuccess,
+    refetch: completedRefetch,
+  } = useQuery({
+    queryKey: ["completedTasks"],
+    queryFn: () =>
+      axios
+        .get(`http://localhost:4500/tasks/completed/${assigneeId}`)
+        .then((res) => {
+          console.log(res.data);
+          return res.data;
+        }),
+  });
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -56,94 +88,14 @@ export default function MyTasks() {
                         To Do
                       </Typography>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <Paper
-                        variant="outlined"
-                        sx={{ padding: { xs: "10px", sm: "10px", md: "15px" } }}
-                      >
-                        <Grid container spacing={1}>
-                          <Grid item xs={6}>
-                            <Chip
-                              label="Nurse"
-                              color="primary"
-                              variant="outlined"
-                            />
-                          </Grid>
-
-                          <Grid item xs={12}>
-                            <Typography variant="h5">
-                              Updating medical records
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={12}>
-                            <Typography variant="body1" color="text.secondary">
-                              Monitor and update the medical records of the
-                              residents John Doe and Jonathan Swift
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={12}>
-                            <Divider flexItem />
-                          </Grid>
-                          <Grid
-                            item
-                            xs={12}
-                            sx={{ display: "flex", gap: "5px" }}
-                          >
-                            <Typography variant="body1" color="text.secondary">
-                              Assignee:
-                            </Typography>
-                            <Link
-                              style={{
-                                cursor: "pointer",
-                                color: "black",
-                              }}
-                              to="/staff/S532344"
-                            >
-                              John Wick
-                            </Link>
-                          </Grid>
-                          <Grid
-                            item
-                            xs={12}
-                            sx={{ display: "flex", gap: "5px" }}
-                          >
-                            <Typography variant="body1" color="text.secondary">
-                              Assigner:
-                            </Typography>
-                            <Typography variant="body1">
-                              Hussein Mohamed
-                            </Typography>
-                          </Grid>
-                          <Grid
-                            item
-                            xs={12}
-                            sx={{ display: "flex", gap: "5px" }}
-                          >
-                            <Typography variant="body1" color="text.secondary">
-                              Assign Date:
-                            </Typography>
-                            <Typography variant="body1">
-                              12/12/2023 - 8:33
-                            </Typography>
-                          </Grid>
-                          <Grid
-                            item
-                            xs={12}
-                            sx={{ display: "flex", gap: "5px" }}
-                          >
-                            <Typography variant="body1" color="text.secondary">
-                              Due Date:
-                            </Typography>
-                            <Typography variant="body1">
-                              13/12/2023 - 12:00
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={12} textAlign="center" marginTop={1}>
-                            <Button variant="contained">Complete</Button>
-                          </Grid>
-                        </Grid>
-                      </Paper>
-                    </Grid>
+                    {isUncompletedTasksSuccess &&
+                      uncompletedTasks.map((task, index) => (
+                        <SpecificUncompletedTasks
+                          key={index}
+                          task={task}
+                          refetch={uncompletedRefetch}
+                        />
+                      ))}
                   </Grid>
                 </Paper>
               </Grid>
@@ -160,104 +112,11 @@ export default function MyTasks() {
                         Completed
                       </Typography>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <Paper
-                        variant="outlined"
-                        sx={{ padding: { xs: "10px", sm: "10px", md: "15px" } }}
-                      >
-                        <Grid container spacing={1}>
-                          <Grid item xs={12}>
-                            <Chip
-                              label="Caregiver"
-                              color="primary"
-                              variant="outlined"
-                            />
-                          </Grid>
-                          <Grid item xs={12}>
-                            <Typography variant="h5">
-                              Assisting residents with daily activities
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={12}>
-                            <Typography variant="body1" color="text.secondary">
-                              Assisting residents Bob Johnson and David Wilson
-                              with daily activities to enhance their hapiness
-                              state
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={12}>
-                            <Divider flexItem />
-                          </Grid>
-                          <Grid
-                            item
-                            xs={12}
-                            sx={{ display: "flex", gap: "5px" }}
-                          >
-                            <Typography variant="body1" color="text.secondary">
-                              Assignee:
-                            </Typography>
-                            <Link
-                              style={{
-                                cursor: "pointer",
-                                color: "black",
-                              }}
-                              to="/staff/S532344"
-                            >
-                              Jane Smith
-                            </Link>
-                          </Grid>
-                          <Grid
-                            item
-                            xs={12}
-                            sx={{ display: "flex", gap: "5px" }}
-                          >
-                            <Typography variant="body1" color="text.secondary">
-                              Assigner:
-                            </Typography>
-                            <Typography variant="body1">
-                              Hussein Mohamed
-                            </Typography>
-                          </Grid>
-                          <Grid
-                            item
-                            xs={12}
-                            sx={{ display: "flex", gap: "5px" }}
-                          >
-                            <Typography variant="body1" color="text.secondary">
-                              Assign Date:
-                            </Typography>
-                            <Typography variant="body1">
-                              12/12/2023 - 8:33
-                            </Typography>
-                          </Grid>
-                          <Grid
-                            item
-                            xs={12}
-                            sx={{ display: "flex", gap: "5px" }}
-                          >
-                            <Typography variant="body1" color="text.secondary">
-                              Due Date:
-                            </Typography>
-                            <Typography variant="body1">
-                              13/12/2023 - 24:00
-                            </Typography>
-                          </Grid>
-                          <Grid
-                            item
-                            xs={12}
-                            sx={{ display: "flex", gap: "5px" }}
-                          >
-                            <Typography variant="body1" color="text.secondary">
-                              Completed at:
-                            </Typography>
-                            <Typography variant="body1">
-                              13/12/2023 - 18:35
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                        <Grid item xs={6}></Grid>
-                      </Paper>
-                    </Grid>
+                    {/*  */}
+                    {isCompletedTasksSuccess &&
+                      completedTasks.map((task, index) => (
+                        <SpecificCompletedTasks task={task} key={index} />
+                      ))}
                   </Grid>
                 </Paper>
               </Grid>

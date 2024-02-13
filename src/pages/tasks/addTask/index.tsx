@@ -9,25 +9,20 @@ import {
   Button,
 } from "@mui/material";
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
-import InboxIcon from "@mui/icons-material/Inbox";
-import DraftsIcon from "@mui/icons-material/Drafts";
-import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
-import EmailIcon from "@mui/icons-material/Email";
 import Navbar from "../../../components/navbar-appDrawer";
-import BackgroundLetterAvatars from "../../residents/residentProfile/LettersAvatar";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
-import TabPanel from "@mui/lab/TabPanel";
+
 import React from "react";
 import MailIcon from "@mui/icons-material/Mail";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import { NavLink, useParams } from "react-router-dom";
-
+import { toast } from "react-toastify";
 import dayjs, { Dayjs } from "dayjs";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 
 const defaultTheme = createTheme();
 export default function AddTask() {
@@ -36,7 +31,39 @@ export default function AddTask() {
   //   dayjs("2022-04-17T15:30")
   // );
   // dueDate without default value
-  const [dueDate, setDueDate] = React.useState<Dayjs | null>();
+  const [dueDate, setDueDate] = React.useState<Dayjs | null>(null);
+  const [taskTitle, setTaskTitle] = React.useState("");
+  const [taskDescription, setTaskDescription] = React.useState("");
+  const assignerId = localStorage.getItem("staffId");
+  const { staffId } = useParams();
+
+  const handleSubmit = () => {
+    const taskData = {
+      taskTitle,
+      taskDescription,
+      assigneeId: parseInt(staffId),
+      assignerId: parseInt(assignerId),
+      dueDate: dueDate?.format("YY-MM-DD HH:mm"),
+      assignDate: dayjs().format("YY-MM-DD HH:mm"),
+    };
+    console.log(taskData);
+    sendTaskData(taskData);
+  };
+  const { mutate: sendTaskData } = useMutation({
+    mutationKey: ["sendTaskData"],
+    mutationFn: (data) => {
+      axios
+        .post(`http://localhost:4500/tasks`, data)
+        .then((response) => {
+          console.log(response);
+          toast.success(response.data.success);
+        })
+        .catch((error) => {
+          console.log(error);
+          toast.error(error.response.data.message);
+        });
+    },
+  });
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -72,6 +99,9 @@ export default function AddTask() {
                         id="outlined-required"
                         label="Task Title"
                         fullWidth
+                        onChange={(e) => {
+                          setTaskTitle(e.target.value);
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -81,9 +111,12 @@ export default function AddTask() {
                         multiline
                         rows={3}
                         fullWidth
+                        onChange={(e) => {
+                          setTaskDescription(e.target.value);
+                        }}
                       />
                     </Grid>
-                    <Grid item xs={6} sx={{ marginTop: "-10px" }}>
+                    <Grid item xs={12} md={6} sx={{ marginTop: "-10px" }}>
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DemoContainer
                           components={["DateTimePicker", "DateTimePicker"]}
@@ -96,7 +129,7 @@ export default function AddTask() {
                         </DemoContainer>
                       </LocalizationProvider>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         id="outlined-read-only-input"
                         label="Role Of The Assignee"
@@ -108,7 +141,9 @@ export default function AddTask() {
                       />
                     </Grid>
                     <Grid item xs={12} textAlign="center">
-                      <Button variant="contained">Add Task</Button>
+                      <Button variant="contained" onClick={handleSubmit}>
+                        Add Task
+                      </Button>
                     </Grid>
                   </Grid>
                 </Paper>

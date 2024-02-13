@@ -16,7 +16,7 @@ import TaskAltIcon from "@mui/icons-material/TaskAlt";
 const MainListItems = () => {
   const location = useLocation();
   const { pathname } = location;
-  console.log(pathname);
+  // console.log(pathname);
   return (
     <React.Fragment>
       <ListItemButton component={NavLink} to="/">
@@ -61,7 +61,7 @@ const MainListItems = () => {
         </ListItemIcon>
         <ListItemText primary="Inventory" />
       </ListItemButton>
-      <ListItemButton component={NavLink} to="/inventory">
+      <ListItemButton component={NavLink} to="/FamilyMembers">
         <ListItemIcon>
           <FamilyRestroomIcon />
         </ListItemIcon>

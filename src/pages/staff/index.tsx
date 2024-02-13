@@ -1,12 +1,32 @@
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
-import { Container, Box, Toolbar, Grid } from "@mui/material";
+import { Container, Box, Toolbar, Grid, Button } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
+import { NavLink } from "react-router-dom";
+
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 import Navbar from "../../components/navbar-appDrawer";
 import StaffTable from "./staffTable";
 const defaultTheme = createTheme();
 
 export default function Staff() {
+  const {
+    isPending,
+    error,
+    data: staffData,
+    isFetching,
+    isSuccess,
+    refetch,
+  } = useQuery({
+    queryKey: ["familyMembersData"],
+    queryFn: () =>
+      axios.get("http://localhost:4500/staff").then((res) => {
+        return res.data;
+      }),
+  });
+
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -29,7 +49,12 @@ export default function Staff() {
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <StaffTable />
+                {isSuccess && <StaffTable staffData={staffData} />}
+              </Grid>
+              <Grid item xs={12} textAlign="center">
+                <Button variant="contained" component={NavLink} to="/staff/add">
+                  Add New Staff Member
+                </Button>
               </Grid>
             </Grid>
           </Container>

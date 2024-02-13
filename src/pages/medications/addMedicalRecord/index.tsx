@@ -8,14 +8,8 @@ import {
   Typography,
   Chip,
   Divider,
-  Link,
   Stack,
-  TextareaAutosize,
-  Switch,
-  FormControlLabel,
-  IconButton,
   Button,
-  Checkbox,
   TextField,
   InputAdornment,
   OutlinedInput,
@@ -25,38 +19,37 @@ import {
 } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
-import InboxIcon from "@mui/icons-material/Inbox";
-import DraftsIcon from "@mui/icons-material/Drafts";
-import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
-import EmailIcon from "@mui/icons-material/Email";
 import Navbar from "../../../components/navbar-appDrawer";
 import BackgroundLetterAvatars from "../../residents/residentProfile/LettersAvatar";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
-import TabPanel from "@mui/lab/TabPanel";
 import React, { useState } from "react";
-import InfoIcon from "@mui/icons-material/Info";
-import VaccinesIcon from "@mui/icons-material/Vaccines";
-import MedicationIcon from "@mui/icons-material/Medication";
-import RepeatIcon from "@mui/icons-material/Repeat";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
+
 import DeleteIcon from "@mui/icons-material/Delete";
-import { NavLink } from "react-router-dom";
-import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import { NavLink, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const defaultTheme = createTheme();
 
 export default function AddMedicalRecord() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+  const { residentId } = useParams();
+  const [weight, setWeight] = useState();
+  const [height, setHeight] = useState();
+  const [bloodType, setBloodType] = useState("");
+  const [information, setInformation] = useState("");
+
+  const handleSubmit = () => {
+    const medicalRecordData = {
+      chronicIllness: illnessArray,
+      allergies: allergiesArray,
+      surgeryUndergone: surgeryArray,
+      weight,
+      height,
+      bloodType,
+      otherRelevantInformation: information,
+    };
+    sendMedicalRecordData(medicalRecordData);
   };
   // Illness
   const [illness, setIllness] = useState("");
@@ -74,7 +67,7 @@ export default function AddMedicalRecord() {
   const [allergiesArray, setAllergiesArray] = useState([]);
   const handleAddAllergies = () => {
     if (allergies == "") {
-      toast.error("Please enter an illness");
+      toast.error("Please enter an allergies");
     } else {
       setAllergiesArray([...allergiesArray, allergies]);
       setIAllergies("");
@@ -85,13 +78,27 @@ export default function AddMedicalRecord() {
   const [surgeryArray, setSurgeryArray] = useState([]);
   const handleAddSurgery = () => {
     if (surgery == "") {
-      toast.error("Please enter an illness");
+      toast.error("Please enter a surgery");
     } else {
       setSurgeryArray([...surgeryArray, surgery]);
       setISurgery("");
     }
   };
-
+  const { mutate: sendMedicalRecordData } = useMutation({
+    mutationKey: ["sendMedicalRecordData"],
+    mutationFn: (data) => {
+      axios
+        .post(`http://localhost:4500/record/${residentId}`, data)
+        .then((response) => {
+          console.log(response);
+          toast.success(response.data.success);
+        })
+        .catch((error) => {
+          console.log(error);
+          toast.error(error.response.data.message);
+        });
+    },
+  });
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -150,6 +157,9 @@ export default function AddMedicalRecord() {
                         endAdornment={
                           <InputAdornment position="end">kg</InputAdornment>
                         }
+                        onChange={(e) => {
+                          setWeight(e.target.value);
+                        }}
                       />
                     </Grid>
                     {/* <Grid item xs={12} sm={6}>
@@ -169,6 +179,9 @@ export default function AddMedicalRecord() {
                         endAdornment={
                           <InputAdornment position="end">cm</InputAdornment>
                         }
+                        onChange={(e) => {
+                          setHeight(e.target.value);
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} sm={4}>
@@ -185,12 +198,18 @@ export default function AddMedicalRecord() {
                         labelId="demo-simple-select-label"
                         id="demo-simple-select"
                         fullWidth
-                        // value={age}
-                        // onChange={handleChange}
+                        value={bloodType}
+                        onChange={(e) => {
+                          setBloodType(e.target.value);
+                        }}
                       >
                         {["A+", "A-", "AB+", "AB-", "B+", "B-", "O+", "O-"].map(
                           (type, index) => {
-                            return <MenuItem value={index}>{type}</MenuItem>;
+                            return (
+                              <MenuItem key={index} value={type}>
+                                {type}
+                              </MenuItem>
+                            );
                           }
                         )}
                       </Select>
@@ -344,14 +363,17 @@ export default function AddMedicalRecord() {
                         multiline
                         rows={4}
                         fullWidth
+                        onChange={(e) => {
+                          setInformation(e.target.value);
+                        }}
                       />
                     </Grid>
                   </Grid>
                   <Button
-                    type="submit"
                     fullWidth
                     variant="contained"
                     sx={{ mt: 3, mb: 2 }}
+                    onClick={handleSubmit}
                   >
                     Add Medical Record
                   </Button>

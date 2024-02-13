@@ -7,6 +7,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import { AccountCircle, Delete, Edit, Key, Send } from "@mui/icons-material";
 import { MenuItem, ListItemIcon, Button } from "@mui/material";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 //example data type
 type Person = {
@@ -22,50 +26,51 @@ type Person = {
 //nested data is ok, see accessorKeys in ColumnDef below
 const data = [
   {
-    productID: "P123456",
-    productName: "Walking canes",
-    category: "Mobility Aids",
-    currentStock: 32,
-    stockThreshold: 10,
-  },
-  {
-    productID: "P1856456",
-    productName: " Shampoo",
-    category: "Personal Hygiene",
-    currentStock: 15,
-    stockThreshold: 8,
-  },
-  {
-    productID: "P58240",
-    productName: "toothpaste",
-    category: "Personal Hygiene",
-    currentStock: 5,
-    stockThreshold: 10,
-  },
-  {
-    productID: "P83592",
-    productName: "Bandages",
-    category: "Medical Supplies",
-    currentStock: 23,
-    stockThreshold: 12,
+    familyMemebrId: "F123456",
+    name: "Ahmed Ali",
+    relatedResident: "John Travolta",
+    relationship: "Brother",
+    phoneNumber: "054387646",
   },
   {
     familyMemebrId: "F123456",
-    name: "Protein shakes",
-    relatedResident: "Nutritional Supplements",
-    currentStock: 15,
-    stockThreshold: 10,
+    name: "Ahmed Ali",
+    relatedResident: "John Travolta",
+    relationship: "Brother",
+    phoneNumber: "054387646",
+  },
+  {
+    familyMemebrId: "F123456",
+    name: "Ahmed Ali",
+    relatedResident: "John Travolta",
+    relationship: "Brother",
+    phoneNumber: "054387646",
+  },
+  {
+    familyMemebrId: "F123456",
+    name: "Ahmed Ali",
+    relatedResident: "John Travolta",
+    relationship: "Brother",
+    phoneNumber: "054387646",
+  },
+  {
+    familyMemebrId: "F123456",
+    name: "Ahmed Ali",
+    relatedResident: "John Travolta",
+    relationship: "Brother",
+    phoneNumber: "054387646",
   },
 ];
-
-const ProductsTable = () => {
+const FamilyTable = (props) => {
   const navigate = useNavigate();
-
+  const familyData = props.familyData;
+  console.log(`FROM FAMILY MEMBERS TABLE`);
+  console.log(familyData);
   //should be memoized or stable
   const columns = useMemo<MRT_ColumnDef<Person>[]>(
     () => [
       {
-        accessorKey: "familyMemebrId", //access nested data with dot notation
+        accessorKey: "FamilyMemberID", //access nested data with dot notation
         header: "ID",
         size: 150,
         muiTableHeadCellProps: {
@@ -76,30 +81,8 @@ const ProductsTable = () => {
         },
       },
       {
-        accessorKey: "name",
+        accessorKey: "FamilyMemberName",
         header: "Name",
-        size: 150,
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-      },
-      {
-        accessorKey: "relatedResident", //normal accessorKey
-        header: "Related Resident",
-        size: 150,
-        muiTableHeadCellProps: {
-          align: "center",
-        },
-        muiTableBodyCellProps: {
-          align: "center",
-        },
-      },
-      {
-        accessorKey: "relationship",
-        header: "Relationship",
         size: 200,
         muiTableHeadCellProps: {
           align: "center",
@@ -109,7 +92,29 @@ const ProductsTable = () => {
         },
       },
       {
-        accessorKey: "phoneNumber",
+        accessorKey: "ResidentName", //normal accessorKey
+        header: "Related Resident",
+        size: 200,
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
+      {
+        accessorKey: "Relationship",
+        header: "Relationship",
+        size: 150,
+        muiTableHeadCellProps: {
+          align: "center",
+        },
+        muiTableBodyCellProps: {
+          align: "center",
+        },
+      },
+      {
+        accessorKey: "PhoneNumber",
         header: "Phone Number",
         size: 150,
         muiTableHeadCellProps: {
@@ -124,9 +129,9 @@ const ProductsTable = () => {
   );
   const table = useMaterialReactTable({
     columns,
-    data,
+    data: familyData,
     enableRowActions: true,
-    getRowId: (originalRow) => originalRow.productID,
+    getRowId: (originalRow) => originalRow.FamilyMemberID,
     renderRowActionMenuItems: ({ closeMenu, row }) => [
       //   <MenuItem
       //     key={0}
@@ -157,7 +162,7 @@ const ProductsTable = () => {
         Edit Data
       </MenuItem>,
       <MenuItem
-        key={1}
+        key={2}
         onClick={() => {
           // Send email logic...
 
@@ -176,4 +181,4 @@ const ProductsTable = () => {
   return <MaterialReactTable table={table} />;
 };
 
-export default ProductsTable;
+export default FamilyTable;

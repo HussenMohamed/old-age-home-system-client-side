@@ -112,14 +112,14 @@ const data = [
   },
 ];
 
-const StaffTable = () => {
+const StaffTable = (props) => {
   const navigate = useNavigate();
-
+  const { staffData } = props;
   //should be memoized or stable
   const columns = useMemo<MRT_ColumnDef<Person>[]>(
     () => [
       {
-        accessorKey: "staffID", //access nested data with dot notation
+        accessorKey: "StaffID", //access nested data with dot notation
         header: "ID",
         size: 150,
         muiTableHeadCellProps: {
@@ -130,7 +130,7 @@ const StaffTable = () => {
         },
       },
       {
-        accessorKey: "name",
+        accessorKey: "Name",
         header: "Name",
         size: 150,
         muiTableHeadCellProps: {
@@ -141,7 +141,7 @@ const StaffTable = () => {
         },
       },
       {
-        accessorKey: "role", //normal accessorKey
+        accessorKey: "RoleName", //normal accessorKey
         header: "Role",
         size: 150,
         muiTableHeadCellProps: {
@@ -152,7 +152,7 @@ const StaffTable = () => {
         },
       },
       {
-        accessorKey: "phoneNumber",
+        accessorKey: "PhoneNumber",
         header: "Phone Number",
         size: 200,
         muiTableHeadCellProps: {
@@ -163,7 +163,7 @@ const StaffTable = () => {
         },
       },
       {
-        accessorKey: "shift",
+        accessorKey: "ShiftTime",
         header: "Shift",
         size: 150,
         muiTableHeadCellProps: {
@@ -178,7 +178,7 @@ const StaffTable = () => {
   );
   const table = useMaterialReactTable({
     columns,
-    data,
+    data: staffData,
     enableRowActions: true,
     getRowId: (originalRow) => originalRow.staffID,
     renderRowActionMenuItems: ({ closeMenu, row }) => [
@@ -211,7 +211,7 @@ const StaffTable = () => {
         Edit Data
       </MenuItem>,
       <MenuItem
-        key={1}
+        key={2}
         onClick={() => {
           // Send email logic...
 

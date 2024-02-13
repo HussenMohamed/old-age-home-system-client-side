@@ -64,15 +64,15 @@ const data = [
     bloodType: "AB-",
   },
 ];
-const RecordsTable = () => {
+const RecordsTable = (props) => {
   const navigate = useNavigate();
-
+  const { medicalRecordsData } = props;
   //should be memoized or stable
   const columns = useMemo<MRT_ColumnDef<Person>[]>(
     () => [
       {
-        accessorKey: "residentID", //access nested data with dot notation
-        header: "ID",
+        accessorKey: "MedicalRecordID", //access nested data with dot notation
+        header: "Medical Record ID",
         size: 150,
         muiTableHeadCellProps: {
           align: "center",
@@ -82,8 +82,8 @@ const RecordsTable = () => {
         },
       },
       {
-        accessorKey: "name",
-        header: "Name",
+        accessorKey: "Name",
+        header: "Resident Name",
         size: 150,
         muiTableHeadCellProps: {
           align: "center",
@@ -94,7 +94,7 @@ const RecordsTable = () => {
       },
 
       {
-        accessorKey: "age",
+        accessorKey: "Age",
         header: "Age",
         size: 150,
         muiTableHeadCellProps: {
@@ -142,9 +142,10 @@ const RecordsTable = () => {
   );
   const table = useMaterialReactTable({
     columns,
-    data,
+    data: medicalRecordsData,
+    // data,
     enableRowActions: true,
-    getRowId: (originalRow) => originalRow.residentID,
+    getRowId: (originalRow) => originalRow.MedicalRecordID,
     renderRowActions: ({ row }) => (
       <Tooltip title="View Medical Record" arrow>
         <Button

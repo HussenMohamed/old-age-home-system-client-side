@@ -8,20 +8,10 @@ import {
   Typography,
   Chip,
   Divider,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Tab,
-  Link,
   FormControl,
-  Input,
   InputAdornment,
-  InputLabel,
   TextField,
   OutlinedInput,
-  FormHelperText,
   FormControlLabel,
   FormLabel,
   Radio,
@@ -31,7 +21,6 @@ import {
 } from "@mui/material";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import RepeatIcon from "@mui/icons-material/Repeat";
 import GradingIcon from "@mui/icons-material/Grading";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
@@ -44,16 +33,13 @@ import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
 import VaccinesIcon from "@mui/icons-material/Vaccines";
 import Navbar from "../../../components/navbar-appDrawer";
 import SendIcon from "@mui/icons-material/Send";
-import BackgroundLetterAvatars from "../residentProfile/LettersAvatar";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
-import TabPanel from "@mui/lab/TabPanel";
 import React, { useState } from "react";
-import { AccountCircle, GridOff } from "@mui/icons-material";
+import axios from "axios";
 import dayjs, { Dayjs } from "dayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import Title from "../../Dashboard/Title";
-
+import { useParams } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
 const defaultTheme = createTheme();
 
 // code for the upload image button
@@ -70,6 +56,7 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export default function AddMedication() {
+  const [medicationName, setMedicationName] = useState("");
   // code for the medication amount input
   const [selectedChip, setSelectedChip] = useState("Pills");
   type MedicationType =
@@ -122,7 +109,7 @@ export default function AddMedication() {
         `before setReminders =>\n timeValue: ${timeValue} \n amountValue: ${amountValue}`
       );
       // Add a new reminder object to the array
-      setReminders([...reminders, { time: timeValue, amount: amountValue }]);
+      setReminders([...reminders, { time: timeValue, dosage: amountValue }]);
 
       // Clear the input fields
       setAmount("");
@@ -133,6 +120,7 @@ export default function AddMedication() {
   };
 
   const [startDate, setStartDate] = React.useState<Dayjs | null>(null);
+  const [endDate, setEndDate] = React.useState<Dayjs | null>(null);
 
   const [duration, setDuration] = React.useState("ongoingTreatment");
 
@@ -187,6 +175,39 @@ export default function AddMedication() {
       [event.target.name]: event.target.checked,
     });
   };
+  const { medicalRecordId } = useParams();
+  const handleSubmit = () => {
+    const medicationData = {
+      medicalRecordId,
+      medicationName,
+      startDate: startDate?.format("YYYY-MM-DD"),
+      endDate: endDate?.format("YYYY-MM-DD"),
+      days: Object.keys(week).filter((day) => week[day]),
+      type: selectedChip,
+      intakeInstructions: Object.keys(instructions).filter(
+        (instruction) => instructions[instruction]
+      ),
+      scheduleTimes: reminders,
+    };
+    console.log(medicationData);
+    sendMedicationData(medicationData);
+  };
+
+  const { mutate: sendMedicationData } = useMutation({
+    mutationKey: ["sendMedicationData"],
+    mutationFn: (data) => {
+      axios
+        .post("http://localhost:4500/medication", data)
+        .then((response) => {
+          console.log(response);
+          toast.success(response.data.success);
+        })
+        .catch((error) => {
+          console.log(error);
+          toast.error(error.response.data.message);
+        });
+    },
+  });
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -236,9 +257,6 @@ export default function AddMedication() {
                       Upload Image
                       <VisuallyHiddenInput type="file" />
                     </Button>
-                    {/* <script async src="https://cse.google.com/cse.js?cx=10a01f0b35ce84e25">
-                    </script>
-                    <div class="gcse-search"></div> */}
                   </Paper>
                 </Grid>
                 <Grid item xs={12}>
@@ -382,13 +400,6 @@ export default function AddMedication() {
                             sx={{ marginTop: "-5px" }}
                           />
                         </FormGroup>
-                        {/* <TextField
-                          id="standard-multiline-flexible"
-                          label="Multiline"
-                          multiline
-                          maxRows={4}
-                          variant="standard"
-                        /> */}
                       </FormControl>
                     </div>
                   </Paper>
@@ -424,6 +435,9 @@ export default function AddMedication() {
                           }}
                           // variant="standard"
                           variant="filled"
+                          onChange={(e) => {
+                            setMedicationName(e.target.value);
+                          }}
                         />
                       </Grid>
                       <Grid
@@ -622,23 +636,24 @@ export default function AddMedication() {
                             <FormControlLabel
                               value="numberOfDays"
                               control={<Radio />}
-                              label="Number Of Days"
+                              label="Specific Duration"
                               // sx={{ marginTop: "-10px" }}
                             />
                             {duration == "numberOfDays" && (
-                              <Grid
-                                item
-                                xs={12}
-                                sm={6}
-                                sx={{ marginTop: "-15px" }}
-                              >
-                                <TextField
-                                  id="standard-number"
-                                  label="Number"
-                                  type="number"
-                                  variant="standard"
-                                  // sx={{ display: "inline" }}
-                                />
+                              <Grid item xs={12} sx={{ marginTop: "-15px" }}>
+                                <LocalizationProvider
+                                  dateAdapter={AdapterDayjs}
+                                >
+                                  <DemoContainer components={["DatePicker"]}>
+                                    <DatePicker
+                                      value={endDate}
+                                      onChange={(newValue) =>
+                                        setEndDate(newValue)
+                                      }
+                                      label="End Date"
+                                    />
+                                  </DemoContainer>
+                                </LocalizationProvider>
                               </Grid>
                             )}
                           </div>
@@ -647,132 +662,111 @@ export default function AddMedication() {
                       <Grid item xs={12} sx={{ marginTop: "10px" }}>
                         <Typography>Days</Typography>
                         <FormControl>
-                          <RadioGroup
-                            aria-labelledby="demo-controlled-radio-buttons-group"
-                            name="controlled-radio-buttons-group"
-                            value={days}
-                            onChange={handleDaysChange}
-                          >
-                            <FormControlLabel
-                              value="everyday"
-                              control={<Radio />}
-                              label="Everyday"
-                            />
-
-                            <FormControlLabel
-                              value="specificDays"
-                              control={<Radio />}
-                              label="Specific Days"
-                              // sx={{ marginTop: "-10px" }}
-                            />
-                            {days == "specificDays" && (
-                              <Grid item xs={12} margin="20px 20px">
-                                <FormControl
-                                  sx={{ margin: "-20px 0 0 20px" }}
-                                  component="fieldset"
-                                  variant="standard"
+                          <Grid item xs={12} margin="20px 20px">
+                            <FormControl
+                              sx={{ margin: "-20px" }}
+                              component="fieldset"
+                              variant="standard"
+                            >
+                              <FormLabel component="legend">
+                                Choose Days
+                              </FormLabel>
+                              <FormGroup>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                  }}
                                 >
-                                  <FormLabel component="legend">
-                                    Choose Days
-                                  </FormLabel>
-                                  <FormGroup>
-                                    <div
-                                      style={{
-                                        display: "flex",
-                                        flexWrap: "wrap",
-                                      }}
-                                    >
-                                      <FormControlLabel
-                                        control={
-                                          <Checkbox
-                                            checked={sunday}
-                                            onChange={handleChange}
-                                            name="sunday"
-                                            sx={{ marginRight: "-8px" }}
-                                            size="small"
-                                          />
-                                        }
-                                        label="Sunday"
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        checked={sunday}
+                                        onChange={handleChange}
+                                        name="sunday"
+                                        sx={{ marginRight: "-8px" }}
+                                        size="small"
                                       />
-                                      <FormControlLabel
-                                        control={
-                                          <Checkbox
-                                            checked={monday}
-                                            onChange={handleChange}
-                                            name="monday"
-                                            sx={{ marginRight: "-8px" }}
-                                            size="small"
-                                          />
-                                        }
-                                        label="Monday"
+                                    }
+                                    label="Sunday"
+                                  />
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        checked={monday}
+                                        onChange={handleChange}
+                                        name="monday"
+                                        sx={{ marginRight: "-8px" }}
+                                        size="small"
                                       />
-                                      <FormControlLabel
-                                        control={
-                                          <Checkbox
-                                            checked={tuesday}
-                                            onChange={handleChange}
-                                            name="tuesday"
-                                            sx={{ marginRight: "-8px" }}
-                                            size="small"
-                                          />
-                                        }
-                                        label="Tuesday"
+                                    }
+                                    label="Monday"
+                                  />
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        checked={tuesday}
+                                        onChange={handleChange}
+                                        name="tuesday"
+                                        sx={{ marginRight: "-8px" }}
+                                        size="small"
                                       />
+                                    }
+                                    label="Tuesday"
+                                  />
 
-                                      <FormControlLabel
-                                        control={
-                                          <Checkbox
-                                            checked={wednesday}
-                                            onChange={handleChange}
-                                            name="wednesday"
-                                            sx={{ marginRight: "-8px" }}
-                                            size="small"
-                                          />
-                                        }
-                                        label="Wednesday"
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        checked={wednesday}
+                                        onChange={handleChange}
+                                        name="wednesday"
+                                        sx={{ marginRight: "-8px" }}
+                                        size="small"
                                       />
-                                      <FormControlLabel
-                                        control={
-                                          <Checkbox
-                                            checked={thursday}
-                                            onChange={handleChange}
-                                            name="thursday"
-                                            sx={{ marginRight: "-8px" }}
-                                            size="small"
-                                          />
-                                        }
-                                        label="Thursday"
+                                    }
+                                    label="Wednesday"
+                                  />
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        checked={thursday}
+                                        onChange={handleChange}
+                                        name="thursday"
+                                        sx={{ marginRight: "-8px" }}
+                                        size="small"
                                       />
-                                      <FormControlLabel
-                                        control={
-                                          <Checkbox
-                                            checked={friday}
-                                            onChange={handleChange}
-                                            name="friday"
-                                            sx={{ marginRight: "-8px" }}
-                                            size="small"
-                                          />
-                                        }
-                                        label="Friday"
+                                    }
+                                    label="Thursday"
+                                  />
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        checked={friday}
+                                        onChange={handleChange}
+                                        name="friday"
+                                        sx={{ marginRight: "-8px" }}
+                                        size="small"
                                       />
-                                      <FormControlLabel
-                                        control={
-                                          <Checkbox
-                                            checked={saturday}
-                                            onChange={handleChange}
-                                            name="saturday"
-                                            sx={{ marginRight: "-8px" }}
-                                            size="small"
-                                          />
-                                        }
-                                        label="Saturday"
+                                    }
+                                    label="Friday"
+                                  />
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        checked={saturday}
+                                        onChange={handleChange}
+                                        name="saturday"
+                                        sx={{ marginRight: "-8px" }}
+                                        size="small"
                                       />
-                                    </div>
-                                  </FormGroup>
-                                </FormControl>
-                              </Grid>
-                            )}
-                          </RadioGroup>
+                                    }
+                                    label="Saturday"
+                                  />
+                                </div>
+                              </FormGroup>
+                            </FormControl>
+                          </Grid>
                         </FormControl>
                       </Grid>
                     </Grid>
@@ -780,7 +774,12 @@ export default function AddMedication() {
                 </Paper>
               </Grid>
               <Grid item xs={12} textAlign="center">
-                <Button variant="contained" endIcon={<SendIcon />} size="large">
+                <Button
+                  variant="contained"
+                  endIcon={<SendIcon />}
+                  size="large"
+                  onClick={handleSubmit}
+                >
                   Add New Medication Schedule
                 </Button>
               </Grid>

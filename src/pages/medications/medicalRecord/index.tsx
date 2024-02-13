@@ -712,7 +712,7 @@ export default function MedicalRecord() {
                               variant="contained"
                               size="large"
                               component={NavLink}
-                              to="/resident/345534/addMedication"
+                              to="/resident/4534/addMedication/5345"
                             >
                               Add New Medication
                             </Button>
