@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 
 import axios from "axios";
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 const userData = [
@@ -80,7 +80,7 @@ function SimpleDialog(props: SimpleDialogProps) {
   };
 
   // fetch the roles so the user can select from them
-  const { isPending, error, data, isFetching } = useQuery({
+  const { isPending, error, data } = useQuery({
     queryKey: ["repoData"],
     queryFn: () =>
       axios.get("http://localhost:4500/roles/staffByRoles").then((res) => {

@@ -23,7 +23,7 @@ import Navbar from "../../../components/navbar-appDrawer";
 import BackgroundLetterAvatars from "../../residents/residentProfile/LettersAvatar";
 import React, { useState } from "react";
 import axios from "axios";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import { NavLink, useParams } from "react-router-dom";
@@ -99,6 +99,18 @@ export default function AddMedicalRecord() {
         });
     },
   });
+
+  const {
+    data: residentInformation,
+    isSuccess: isResidentsInformationSuccess,
+  } = useQuery({
+    queryKey: ["residentInformation"],
+    queryFn: () =>
+      axios.get(`http://localhost:4500/residents/${residentId}`).then((res) => {
+        console.log(res);
+        return res.data[0];
+      }),
+  });
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -128,13 +140,26 @@ export default function AddMedicalRecord() {
                     alignItems="center"
                     // divider={<Divider orientation="vertical" flexItem />}
                   >
-                    <BackgroundLetterAvatars name="John Doe" />
+                    {isResidentsInformationSuccess && (
+                      <BackgroundLetterAvatars
+                        name={residentInformation.Name}
+                      />
+                    )}
                     <div>
-                      <Typography variant="h5">John Doe</Typography>
+                      {isResidentsInformationSuccess && (
+                        <Typography variant="h5">
+                          {residentInformation.Name}
+                        </Typography>
+                      )}
+
                       <Chip label="ID: R334455" />
                     </div>
                     <Divider orientation="vertical" flexItem />
-                    <Typography variant="h6">77 Years Old</Typography>
+                    {isResidentsInformationSuccess && (
+                      <Typography variant="h6">
+                        {residentInformation.Age} Years Old
+                      </Typography>
+                    )}
                   </Stack>
                 </Paper>
               </Grid>

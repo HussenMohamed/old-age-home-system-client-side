@@ -112,7 +112,7 @@ const NoRecordsTable = (props) => {
     columns,
     data: residentsWithNoRecords,
     enableRowActions: true,
-    getRowId: (originalRow) => originalRow.residentID,
+    getRowId: (originalRow) => originalRow.ResidentID,
     renderRowActions: ({ row }) => (
       <Tooltip title="Add Medical Record" arrow>
         <Button

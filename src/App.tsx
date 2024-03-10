@@ -25,7 +25,7 @@ import AddResident from "./pages/residents/AddResident.tsx";
 import AddStaffMember from "./pages/staff/addStaff/index.tsx";
 
 function App() {
-  localStorage.setItem("staffId", 6);
+  localStorage.setItem("staffId", 7);
   return (
     <div>
       <Router>
@@ -36,14 +36,14 @@ function App() {
           <Route path="/residents" element={<Residents />} />
           <Route path="/residents/add" element={<AddResident />} />
           <Route path="/resident/:id/edit" element={<ResidentProfile />} />
-          <Route path="/resident/:id" element={<ViewResident />} />
+          <Route path="/resident/:residentId" element={<ViewResident />} />
           <Route
-            path="/resident/:id/addMedication/:medicalRecordId"
+            path="/resident/:residentId/addMedication/:medicalRecordId"
             element={<AddMedication />}
           />
           {/* addMedication */}
           <Route
-            path="/resident/:id/medicalRecord"
+            path="/resident/:recordId/medicalRecord"
             element={<MedicalRecord />}
           />
           <Route

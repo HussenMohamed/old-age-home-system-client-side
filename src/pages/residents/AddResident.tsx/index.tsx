@@ -15,7 +15,8 @@ import {
 import { NavLink, useParams } from "react-router-dom";
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
 import Navbar from "../../../components/navbar-appDrawer";
-
+import { useQuery } from "@tanstack/react-query";
+import Autocomplete from "@mui/material/Autocomplete";
 import * as React from "react";
 
 import dayjs, { Dayjs } from "dayjs";
@@ -27,7 +28,24 @@ import axios from "axios";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { lighten, darken } from "@mui/system";
+
 const defaultTheme = createTheme();
+
+const GroupHeader = styled("div")(({ theme }) => ({
+  position: "sticky",
+  top: "-8px",
+  padding: "4px 10px",
+  color: theme.palette.primary.main,
+  backgroundColor:
+    theme.palette.mode === "light"
+      ? lighten(theme.palette.primary.light, 0.85)
+      : darken(theme.palette.primary.main, 0.8),
+}));
+
+const GroupItems = styled("ul")({
+  padding: 0,
+});
 
 export default function AddResident() {
   const { id } = useParams<string>();
@@ -41,7 +59,7 @@ export default function AddResident() {
   const [uncn, setUncn] = useState("");
   const [address, setAddress] = useState("");
   const [numberOfChildren, setNumberOfChildren] = useState();
-  const [roomNumber, setRoomNumber] = useState();
+  const [roomNumber, setRoomNumber] = useState(null);
   const [birthDate, setBirthDate] = useState<Dayjs | null>(null);
 
   const { mutate: sendResidentData } = useMutation({
@@ -71,10 +89,43 @@ export default function AddResident() {
       numberOfChildren: numberOfChildren,
       roomNumber: roomNumber,
       birthDate: birthDate?.format("YYYY-MM-DD"),
+      ResponsibleStaffID: inputValue,
     };
-    sendResidentData(residentData);
+    console.log(residentData);
+    // sendResidentData(residentData);
   };
 
+  const [inputValue, setInputValue] = React.useState("");
+
+  // fetch the roles so the user can select from them
+  const { data: roomsData, isSuccess: isRoomsSuccess } = useQuery({
+    queryKey: ["roomsData"],
+    queryFn: () =>
+      axios.get("http://localhost:4500/room/available").then((res) => {
+        console.log(res.data);
+        return res.data;
+      }),
+  });
+
+  // fetch the roles so the user can select from them
+  const { isPending, error, data } = useQuery({
+    queryKey: ["repoData"],
+    queryFn: () =>
+      axios.get("http://localhost:4500/roles/staffByRoles").then((res) => {
+        return res.data;
+      }),
+  });
+
+  if (isPending) return "Loading...";
+
+  if (error) return "An error has occurred: " + error.message;
+
+  const options = data
+    .map((option) => ({
+      role: option.roleName,
+      ...option,
+    }))
+    .sort((a, b) => a.role.localeCompare(b.role));
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -226,32 +277,80 @@ export default function AddResident() {
                             }}
                           />
                         </Grid>
+
                         <Grid item xs={12} sm={6}>
-                          <TextField
-                            required
-                            fullWidth
-                            name="roomNumber"
-                            label="Room Number"
-                            type="number"
-                            id="roomNumber"
-                            onChange={(e) => {
-                              setRoomNumber(e.target.value);
+                          <Autocomplete
+                            id="grouped-demo"
+                            options={options.sort(
+                              (a, b) => -b.role.localeCompare(a.role)
+                            )}
+                            groupBy={(option) => option.role}
+                            getOptionLabel={(option) => option.staffMemberName}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Responsible Staff Member"
+                              />
+                            )}
+                            renderGroup={(params) => (
+                              <li key={params.key} value={options.StaffID}>
+                                <GroupHeader>{params.group}</GroupHeader>
+                                <GroupItems>{params.children}</GroupItems>
+                              </li>
+                            )}
+                            onChange={(event: any, newValue: string | null) => {
+                              setInputValue(newValue.StaffID);
                             }}
                           />
                         </Grid>
-                      </Grid>
-                      <Grid item xs={12} marginTop={1}>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                          <DemoContainer components={["DatePicker"]}>
-                            <DemoItem label="Birth Date">
+                        <Grid item xs={6}>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DemoItem>
                               <DatePicker
+                                label="Birth Date"
                                 defaultValue={birthDate}
                                 // value={dateValue}
                                 onChange={(newValue) => setBirthDate(newValue)}
                               />
                             </DemoItem>
-                          </DemoContainer>
-                        </LocalizationProvider>
+                          </LocalizationProvider>
+                        </Grid>
+                        <Grid item xs={12}>
+                          <FormControl fullWidth>
+                            <InputLabel id="demo-simple-select-helper-label">
+                              Room Number
+                            </InputLabel>
+                            <Select
+                              labelId="demo-simple-select-helper-label"
+                              label="Room Number"
+                              value={roomNumber}
+                              onChange={(event) => {
+                                setRoomNumber(event.target.value);
+                              }}
+                              fullWidth
+                            >
+                              {isRoomsSuccess &&
+                                roomsData.map((room) => (
+                                  <MenuItem
+                                    value={room.RoomNumber}
+                                    sx={{
+                                      display: "flex",
+                                      // flexDirection: "column",
+                                      justifyContent: "space-around",
+                                    }}
+                                  >
+                                    <span>Room Number: {room.RoomNumber}</span>
+                                    <span>
+                                      Room Current Occupancy: {room.Occupancy}
+                                    </span>
+                                    <span>
+                                      Room Max Capacity: {room.MaxCapacity}
+                                    </span>
+                                  </MenuItem>
+                                ))}
+                            </Select>
+                          </FormControl>
+                        </Grid>
                       </Grid>
 
                       <Button

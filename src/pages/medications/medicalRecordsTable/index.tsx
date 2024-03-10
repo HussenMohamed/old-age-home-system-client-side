@@ -60,6 +60,7 @@ export default function MedicalRecords() {
       axios
         .get("http://localhost:4500/residents/noMedicalRecords")
         .then((res) => {
+          console.log(res);
           return res.data;
         }),
   });

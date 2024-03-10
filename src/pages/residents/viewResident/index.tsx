@@ -27,12 +27,13 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 
 const defaultTheme = createTheme();
 export default function ViewResident() {
   // For Tabs
   const [value, setValue] = React.useState("1");
+  const { residentId } = useParams();
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
@@ -77,7 +78,7 @@ export default function ViewResident() {
                     From 12-9-2021
                   </Typography> */}
                   <Chip
-                    label="ID: R334455"
+                    label={`ID: ${residentId}`}
                     size="small"
                     sx={{ marginBottom: 2, marginTop: 0.5 }}
                   />
@@ -89,7 +90,7 @@ export default function ViewResident() {
                     >
                       <ListItemButton
                         component={NavLink}
-                        to="/resident/5346345/medicalRecord"
+                        to={`/resident/${residentId}/medicalRecord`}
                       >
                         <ListItemIcon>
                           <InboxIcon />

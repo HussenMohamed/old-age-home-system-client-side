@@ -578,7 +578,7 @@ export default function AddMedication() {
                       </Grid>
                       <Grid item xs={9}>
                         {reminders.map((reminder, index) => (
-                          <div style={{ display: "flex" }}>
+                          <div style={{ display: "flex" }} key={index}>
                             <Grid item xs={6} display="flex" gap="5px">
                               <Typography color="text.secondary">
                                 Time:
@@ -589,7 +589,7 @@ export default function AddMedication() {
                               <Typography color="text.secondary">
                                 Amount:
                               </Typography>
-                              <Typography>{reminder.amount}</Typography>
+                              <Typography>{reminder.dosage}</Typography>
                             </Grid>
                           </div>
                         ))}

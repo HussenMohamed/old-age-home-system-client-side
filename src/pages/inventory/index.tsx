@@ -5,12 +5,20 @@ import { useNavigate } from "react-router-dom";
 
 import Navbar from "../../components/navbar-appDrawer";
 import ProductsTable from "./productsTable";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 // import StaffTable from "./staffTable";
 const defaultTheme = createTheme();
 
 export default function Inventory() {
   const navigate = useNavigate();
-
+  const { data: productsData, isSuccess } = useQuery({
+    queryKey: ["productsData"],
+    queryFn: () =>
+      axios.get("http://localhost:4500/product").then((res) => {
+        return res.data;
+      }),
+  });
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -33,7 +41,7 @@ export default function Inventory() {
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <ProductsTable />
+                {isSuccess && <ProductsTable productsData={productsData} />}
               </Grid>
               <Grid item xs={12} textAlign="center">
                 <Button

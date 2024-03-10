@@ -37,6 +37,9 @@ export default function MyTasks() {
       axios
         .get(`http://localhost:4500/tasks/uncompleted/${assigneeId}`)
         .then((res) => {
+          console.log(
+            `This is the uncompleted tasks for staff id : ${assigneeId}`
+          );
           console.log(res.data);
           return res.data;
         }),

@@ -330,7 +330,7 @@ const ResidentsTable = (props) => {
     columns,
     data: residentsData,
     enableRowActions: true,
-    getRowId: (originalRow) => originalRow.residentID,
+    getRowId: (originalRow) => originalRow.ResidentID,
     muiTableBodyRowProps: ({ row }) => ({
       onClick: (event) => {
         // Id = row.id;
@@ -371,7 +371,7 @@ const ResidentsTable = (props) => {
         Edit Data
       </MenuItem>,
       <MenuItem
-        key={1}
+        key={2}
         onClick={() => {
           // Send email logic...
 

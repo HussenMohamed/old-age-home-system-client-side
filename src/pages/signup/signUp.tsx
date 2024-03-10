@@ -186,7 +186,6 @@ export const SignUp = () => {
                 />
               </Grid>
               <Grid item xs={12}>
-                {" "}
                 <ButtonGroup aria-label="outlined button group">
                   <Button
                     variant={
